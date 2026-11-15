@@ -159,9 +159,10 @@ export const MenuSection: React.FC = () => {
   );
 
   return (
-    <section id="menu-section" className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
-      {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-8">
+    <section id="menu-section" className="py-14 bg-stone-50 border-t border-stone-200/80 scroll-mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-8">
         <span className="text-xs font-black uppercase tracking-widest text-orange-600 bg-orange-100/80 border border-orange-200 px-3.5 py-1 rounded-full">
           Nuestra Gastronomía
         </span>
@@ -527,6 +528,7 @@ export const MenuSection: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 };

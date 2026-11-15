@@ -63,7 +63,7 @@ export const AppContent: React.FC = () => {
         </AdminLayout>
       ) : (
         /* CUSTOMER PUBLIC RESTAURANT EXPERIENCE */
-        <div className="min-h-screen bg-stone-900 flex flex-col">
+        <div className="min-h-screen bg-stone-50 flex flex-col">
           <Navbar
             onOpenCart={() => setIsCartOpen(true)}
             onOpenReservations={() => setIsReservationsOpen(true)}
