@@ -170,11 +170,13 @@ export const WaiterView: React.FC = () => {
       {/* TOP BAR: TABLE & WAITER SELECTOR */}
       <div className="bg-stone-900 text-white p-4 rounded-3xl shadow-md space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Smartphone className="w-5 h-5 text-orange-400" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-white/95 p-0.5 border border-orange-400 overflow-hidden shrink-0 shadow-xs">
+              <img src="/mascot.png" alt="Mozo" className="w-full h-full object-contain" />
+            </div>
             <h2 className="text-base font-black tracking-tight">Comandero Rápido</h2>
           </div>
-          <span className="text-[11px] font-bold text-stone-400 bg-stone-800 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-bold text-stone-300 bg-stone-800 px-2.5 py-1 rounded-full border border-stone-700">
             📱 Modo Mozo
           </span>
         </div>

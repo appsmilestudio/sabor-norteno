@@ -56,11 +56,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           {/* Logo Brand Header */}
           <div className="p-4 border-b border-stone-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-orange-500 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-white p-0.5 border border-orange-500 overflow-hidden shrink-0">
                 <img
-                  src="/LOGO.jpg"
-                  alt="Sabor Norteño"
+                  src="/mascot.png"
+                  alt="Sabor Norteño Mascot"
                   className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/LOGO.jpg';
+                  }}
                 />
               </div>
               <div>

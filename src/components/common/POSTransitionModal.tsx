@@ -36,11 +36,11 @@ export const POSTransitionModal: React.FC<POSTransitionModalProps> = ({ onComple
           
           <div className="relative w-24 h-24 bg-white rounded-full p-2 border-2 border-orange-500 shadow-2xl flex items-center justify-center overflow-hidden animate-spin-slow">
             <img
-              src="/logo_clean_no_shadow.png"
-              alt="Sabor Norteño"
+              src="/mascot.png"
+              alt="Sabor Norteño Mascot"
               className="w-full h-full object-contain"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/LOGO.jpg';
+                (e.target as HTMLImageElement).src = '/logo_clean_no_shadow.png';
               }}
             />
           </div>

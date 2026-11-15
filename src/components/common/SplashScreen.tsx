@@ -45,13 +45,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         <div className="relative mb-6 transform transition-all duration-700 ease-out animate-bounce">
           <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 via-amber-400 to-red-500 rounded-full blur-xl opacity-60 animate-spin"></div>
           
-          <div className="relative w-32 h-32 sm:w-40 sm:h-40 bg-white/95 rounded-full p-2 shadow-2xl border-4 border-amber-400/80 flex items-center justify-center overflow-hidden">
+          <div className="relative w-32 h-32 sm:w-40 sm:h-40 bg-white/95 rounded-full p-2.5 shadow-2xl border-4 border-amber-400/80 flex items-center justify-center overflow-hidden">
             <img
-              src="/logo_clean_no_shadow.png"
-              alt="Sabor Norteño"
+              src="/mascot.png"
+              alt="Sabor Norteño Mascot"
               className="w-full h-full object-contain transform hover:scale-105 transition-transform"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/LOGO.jpg';
+                (e.target as HTMLImageElement).src = '/logo_clean_no_shadow.png';
               }}
             />
           </div>
