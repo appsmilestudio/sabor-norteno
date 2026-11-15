@@ -51,21 +51,8 @@ export const MenuSection: React.FC = () => {
   };
 
   // State to track which categories are expanded/collapsed
-  // By default, open the first 4 prominent categories
-  const [openCategories, setOpenCategories] = useState<{ [catId: string]: boolean }>({
-    entradas: true,
-    ceviches: true,
-    causas: true,
-    piqueos: true,
-    rondas: true,
-    chicharrones: false,
-    arroces: false,
-    sudados: false,
-    almuerzos: false,
-    alitas: false,
-    combos: false,
-    bebidas: false,
-  });
+  // Collapsed by default on the main screen for a clean, professional view
+  const [openCategories, setOpenCategories] = useState<{ [catId: string]: boolean }>({});
 
   // Customization modal state
   const [activeDish, setActiveDish] = useState<MenuItem | null>(null);

@@ -49,6 +49,7 @@ export interface Order {
   total: number;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
+  waiter?: string;
   createdAt: string;
   estimatedTime?: string;
   notes?: string;

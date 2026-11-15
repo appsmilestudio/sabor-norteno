@@ -10,6 +10,11 @@ interface AppContextType {
   adminSubView: 'waiter' | 'pos' | 'tables' | 'kitchen' | 'online_orders' | 'inventory' | 'reservations' | 'reports';
   setAdminSubView: (view: 'waiter' | 'pos' | 'tables' | 'kitchen' | 'online_orders' | 'inventory' | 'reservations' | 'reports') => void;
 
+  // POS Animation Transition
+  isPOSTransitioning: boolean;
+  enterPOSWithAnimation: (subView?: 'waiter' | 'pos' | 'tables' | 'kitchen' | 'online_orders' | 'inventory' | 'reservations' | 'reports') => void;
+  finishPOSTransition: () => void;
+
   // Database Connection Status
   isLiveDatabase: boolean;
 
@@ -52,6 +57,11 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Multi-tab real-time sync channel
+const localSyncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
+  ? new BroadcastChannel('sabor_norteno_channel')
+  : null;
+
 // Sound alert using authentic MP3 with Web Audio API fallback
 const playTone = () => {
   try {
@@ -81,7 +91,18 @@ const playTone = () => {
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAdminView, setIsAdminView] = useState<boolean>(false);
   const [adminSubView, setAdminSubView] = useState<'waiter' | 'pos' | 'tables' | 'kitchen' | 'online_orders' | 'inventory' | 'reservations' | 'reports'>('pos');
+  const [isPOSTransitioning, setIsPOSTransitioning] = useState<boolean>(false);
   const [isLiveDatabase, setIsLiveDatabase] = useState<boolean>(isSupabaseConfigured());
+
+  const enterPOSWithAnimation = (subView: 'waiter' | 'pos' | 'tables' | 'kitchen' | 'online_orders' | 'inventory' | 'reservations' | 'reports' = 'pos') => {
+    setAdminSubView(subView);
+    setIsPOSTransitioning(true);
+  };
+
+  const finishPOSTransition = () => {
+    setIsAdminView(true);
+    setIsPOSTransitioning(false);
+  };
 
   // Load Menu with LocalStorage fallback
   const [menu, setMenu] = useState<MenuItem[]>(() => {
@@ -148,6 +169,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: 'ord-102',
         orderNumber: 'SN-102',
         type: 'table',
+        waiter: 'Carlos M.',
         customer: {
           name: 'Mesa 1 (Salón)',
           phone: '',
@@ -251,6 +273,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [inventory]);
 
   // =========================================================================
+  // MULTI-TAB & BROWSER REAL-TIME SYNC (BroadcastChannel & Storage Event)
+  // =========================================================================
+  useEffect(() => {
+    if (!localSyncChannel) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'NEW_ORDER' && data.order) {
+        setOrders(prev => {
+          if (prev.some(o => o.id === data.order.id)) return prev;
+          return [data.order, ...prev];
+        });
+        playTone();
+      } else if (data.type === 'UPDATE_ORDER_STATUS' && data.orderId) {
+        setOrders(prev =>
+          prev.map(o => (o.id === data.orderId ? { ...o, status: data.status } : o))
+        );
+      } else if (data.type === 'UPDATE_TABLES' && data.tables) {
+        setTables(data.tables);
+      }
+    };
+
+    localSyncChannel.addEventListener('message', handleMessage);
+
+    // Also support storage event across tabs
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'sn_orders' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setOrders(parsed);
+        } catch (err) {}
+      } else if (e.key === 'sn_tables' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setTables(parsed);
+        } catch (err) {}
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      localSyncChannel.removeEventListener('message', handleMessage);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
+  // =========================================================================
   // SUPABASE REALTIME & DATA SYNC (When credentials are provided)
   // =========================================================================
   useEffect(() => {
@@ -316,6 +388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             total: Number(o.total),
             paymentMethod: o.payment_method,
             status: o.status,
+            waiter: o.waiter,
             createdAt: o.created_at,
             notes: o.notes
           }));
@@ -380,6 +453,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             total: Number(o.total),
             paymentMethod: o.payment_method,
             status: o.status,
+            waiter: o.waiter,
             createdAt: o.created_at,
             notes: o.notes
           };
@@ -527,6 +601,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders(prev => [newOrder, ...prev]);
     playTone();
 
+    // Broadcast in real-time to other local tabs
+    localSyncChannel?.postMessage({
+      type: 'NEW_ORDER',
+      order: newOrder
+    });
+
     // Async push to Supabase if connected
     const client = supabase;
     if (client && isSupabaseConfigured()) {
@@ -545,6 +625,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           payment_method: newOrder.paymentMethod,
           status: newOrder.status,
           table_id: newOrder.customer.tableNumber ? Number(newOrder.customer.tableNumber) : null,
+          waiter: newOrder.waiter,
           notes: newOrder.notes,
           created_at: newOrder.createdAt
         })
@@ -561,6 +642,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       prev.map(ord => (ord.id === orderId ? { ...ord, status } : ord))
     );
 
+    // Broadcast to other tabs
+    localSyncChannel?.postMessage({
+      type: 'UPDATE_ORDER_STATUS',
+      orderId,
+      status
+    });
+
     const client = supabase;
     if (client && isSupabaseConfigured()) {
       client
@@ -575,9 +663,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Tables
   const updateTableStatus = (tableId: number, status: TableStatus) => {
-    setTables(prev =>
-      prev.map(t => (t.id === tableId ? { ...t, status } : t))
-    );
+    let updatedTables: RestaurantTable[] = [];
+    setTables(prev => {
+      updatedTables = prev.map(t => (t.id === tableId ? { ...t, status } : t));
+      return updatedTables;
+    });
+
+    // Broadcast to other tabs
+    localSyncChannel?.postMessage({
+      type: 'UPDATE_TABLES',
+      tables: updatedTables
+    });
 
     const client = supabase;
     if (client && isSupabaseConfigured()) {
@@ -596,9 +692,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     let updatedTableData: any = null;
+    let nextTables: RestaurantTable[] = [];
 
-    setTables(prev =>
-      prev.map(table => {
+    setTables(prev => {
+      nextTables = prev.map(table => {
         if (table.id === tableId) {
           const currentTotal = (table.totalCurrent || 0) + subtotal;
           updatedTableData = {
@@ -616,8 +713,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
         }
         return table;
-      })
-    );
+      });
+      return nextTables;
+    });
+
+    // Broadcast to other tabs
+    localSyncChannel?.postMessage({
+      type: 'UPDATE_TABLES',
+      tables: nextTables
+    });
 
     const client = supabase;
     if (client && isSupabaseConfigured() && updatedTableData) {
@@ -630,7 +734,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
     }
 
-    // Also register comanda in orders list
+    // Also register comanda in orders list with waiter
     const targetTable = tables.find(t => t.id === tableId);
     createOrder({
       type: 'table',
@@ -639,6 +743,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         phone: '',
         tableNumber: targetTable?.number || tableId
       },
+      waiter: waiter,
       items,
       subtotal,
       deliveryFee: 0,
@@ -650,8 +755,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const closeTableAccount = (tableId: number) => {
-    setTables(prev =>
-      prev.map(t =>
+    let nextTables: RestaurantTable[] = [];
+    setTables(prev => {
+      nextTables = prev.map(t =>
         t.id === tableId
           ? {
               ...t,
@@ -662,8 +768,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               activeOrder: undefined
             }
           : t
-      )
-    );
+      );
+      return nextTables;
+    });
+
+    // Broadcast to other tabs
+    localSyncChannel?.postMessage({
+      type: 'UPDATE_TABLES',
+      tables: nextTables
+    });
 
     const client = supabase;
     if (client && isSupabaseConfigured()) {
@@ -759,6 +872,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsAdminView,
         adminSubView,
         setAdminSubView,
+        isPOSTransitioning,
+        enterPOSWithAnimation,
+        finishPOSTransition,
         isLiveDatabase,
         menu,
         toggleItemStock,

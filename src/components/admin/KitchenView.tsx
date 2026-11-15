@@ -127,6 +127,15 @@ export const KitchenView: React.FC = () => {
                     </span>
                   </div>
 
+                  {order.waiter && (
+                    <div className="pb-1.5 flex items-center gap-1.5 text-[11px] font-bold text-stone-500">
+                      <span>Mozo:</span>
+                      <span className="text-stone-900 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200">
+                        📱 {order.waiter}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Items list */}
                   <div className="py-2 space-y-2 border-t border-stone-100">
                     {order.items.map((item, idx) => (

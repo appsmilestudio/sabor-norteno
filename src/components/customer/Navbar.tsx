@@ -15,7 +15,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onScrollToMenu,
   onScrollToInfo
 }) => {
-  const { cartCount, cartTotal, setIsAdminView, setAdminSubView } = useApp();
+  const { cartCount, cartTotal, enterPOSWithAnimation } = useApp();
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-sm transition-all">
@@ -92,10 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Waiter Mobile Mode Direct Button */}
           <button
-            onClick={() => {
-              setIsAdminView(true);
-              setAdminSubView('waiter');
-            }}
+            onClick={() => enterPOSWithAnimation('waiter')}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-black text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 rounded-xl transition-all border border-amber-300 shadow-sm"
             title="Modo Mozo / Comandero Rápido en Teléfono"
           >
@@ -105,10 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Backoffice Admin Button */}
           <button
-            onClick={() => {
-              setIsAdminView(true);
-              setAdminSubView('pos');
-            }}
+            onClick={() => enterPOSWithAnimation('pos')}
             className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all border border-stone-200"
             title="Ingreso a POS, Mesas, Cocina e Inventario"
           >
