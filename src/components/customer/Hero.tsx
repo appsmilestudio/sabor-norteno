@@ -143,50 +143,43 @@ export const Hero: React.FC<HeroProps> = ({ onOrderNow, onOpenReservations }) =>
           
           {/* LEFT: PROMOTIONAL CAROUSEL (Col 7) */}
           <div className="lg:col-span-7 flex flex-col">
-            <div className="relative rounded-3xl overflow-hidden bg-stone-800/80 border border-stone-700/80 shadow-2xl flex-1 flex flex-col justify-between group">
+            <div className="relative rounded-3xl overflow-hidden bg-stone-900 border border-stone-800 shadow-2xl flex-1 flex flex-col justify-between p-3 sm:p-4 group">
               
-              {/* Carousel Image with Zoom */}
-              <div className="relative h-[340px] sm:h-[400px] w-full overflow-hidden bg-stone-950">
+              {/* Carousel Image - Full 100% Uncropped Flyer View */}
+              <div className="relative h-[480px] sm:h-[530px] w-full flex items-center justify-center bg-stone-950/70 rounded-2xl overflow-hidden border border-stone-800/80">
                 <img
                   src={PROMOS[currentPromo].image}
                   alt={PROMOS[currentPromo].title}
-                  className="w-full h-full object-contain sm:object-cover transform group-hover:scale-105 transition-transform duration-700"
+                  className="max-h-full max-w-full object-contain rounded-xl shadow-2xl transition-all duration-500"
                 />
-                
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent"></div>
-
-                {/* Floating Promo Tag */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-lg ${PROMOS[currentPromo].tagColor}`}>
-                    {PROMOS[currentPromo].tag}
-                  </span>
-                </div>
 
                 {/* Arrow Controls */}
                 <button
+                  type="button"
                   onClick={prevPromo}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-900/80 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-sm transition-all border border-white/20 active:scale-95"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-900/85 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-md transition-all border border-white/20 active:scale-95 shadow-lg z-10"
                   aria-label="Promoción anterior"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
+                  type="button"
                   onClick={nextPromo}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-900/80 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-sm transition-all border border-white/20 active:scale-95"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-stone-900/85 hover:bg-orange-600 text-white flex items-center justify-center backdrop-blur-md transition-all border border-white/20 active:scale-95 shadow-lg z-10"
                   aria-label="Siguiente promoción"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
 
-                {/* Dots indicator */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                {/* Dots indicator inside the image container */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10 bg-stone-900/90 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md shadow-md">
                   {PROMOS.map((_, idx) => (
                     <button
                       key={idx}
+                      type="button"
                       onClick={() => setCurrentPromo(idx)}
                       className={`h-2 rounded-full transition-all ${
-                        idx === currentPromo ? 'w-7 bg-orange-500' : 'w-2 bg-white/50 hover:bg-white'
+                        idx === currentPromo ? 'w-6 bg-orange-500' : 'w-2 bg-white/40 hover:bg-white'
                       }`}
                       aria-label={`Ver promoción ${idx + 1}`}
                     />
@@ -195,23 +188,25 @@ export const Hero: React.FC<HeroProps> = ({ onOrderNow, onOpenReservations }) =>
               </div>
 
               {/* Bottom Details Bar */}
-              <div className="p-4 sm:p-5 bg-stone-900 border-t border-stone-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-3 pt-3 border-t border-stone-800 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-black text-white">
+                  <h3 className="text-base font-black text-white">
                     {PROMOS[currentPromo].title}
                   </h3>
-                  <p className="text-xs text-amber-300 font-extrabold">
-                    {PROMOS[currentPromo].subtitle} · <span className="text-white font-medium">{PROMOS[currentPromo].highlight}</span>
+                  <p className="text-xs text-amber-300 font-bold">
+                    {PROMOS[currentPromo].subtitle}
                   </p>
                 </div>
 
-                <button
-                  onClick={onOrderNow}
-                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                <a
+                  href={`https://wa.me/51974283249?text=${encodeURIComponent(`Hola Sabor Norteño, deseo pedir la promoción: ${PROMOS[currentPromo].title}`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                 >
-                  <span>Pedir Promo</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                  <Phone className="w-3.5 h-3.5 text-white" />
+                  <span>Pedir Promo por WhatsApp</span>
+                </a>
               </div>
 
             </div>
